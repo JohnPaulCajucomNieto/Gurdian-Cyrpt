@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hash Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F5CCA0;
+        }
+
+        header {
+            background-color: #F2EFE9;
+            color: #d5cea3;
+            padding: 20px;
+            text-align: center;
+            border: 6px solid #000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #994D1C;
+            padding: 10px;
+        }
+
+        nav a {
+            color: #d5cea3;
+            text-decoration: none;
+            padding: 10px;
+            margin: 0 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: #1a120b;
+        }
+
+        #container {
+            background-color: #E48F45;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: 30px auto;
+            max-width: 400px; /* Adjusted to set the maximum width */
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input, select, button {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #F5CCA0;
+        }
+
+        button {
+            background-color: #6B240C;
+            color: #d5cea3;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1d1410;
+        }
+
+        #output-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #F5CCA0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #output-label {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #output {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            word-wrap: break-word;
+        }
+
+        @media only screen and (max-width: 600px) {
+            #output {
+                font-size: 16px;
+            }
+        }
+
+        button.copy-button {
+            background-color: #6B240C;
+            color: #d5cea3;
+            margin-top: 15px;
+        }
+
+        button.copy-button:hover {
+            background-color: #1d1410;
+        }
+    </style>
+
+    <script>
+        function hashString(input, algorithm) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(input);
+            let hash;
+
+            switch (algorithm) {
+                case 'sha256':
+                    hash = crypto.subtle.digest('SHA-256', data);
+                    break;
+                case 'sha512':
+                    hash = crypto.subtle.digest('SHA-512', data);
+                    break;
+                case 'sha1':
+                    hash = crypto.subtle.digest('SHA-1', data);
+                    break;
+                case 'sha384':
+                    hash = crypto.subtle.digest('SHA-384', data);
+                    break;
+                default:
+                    hash = 'Invalid algorithm';
+            }
+
+            hash.then(result => {
+                const hashArray = Array.from(new Uint8Array(result));
+                const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+                const outputElement = document.getElementById('output');
+                outputElement.textContent = `Hashed Text (${algorithm}): ${hashHex}`;
+
+               
+                const copyButton = document.createElement('button');
+                copyButton.textContent = 'Copy to Clipboard';
+                copyButton.className = 'copy-button';
+                copyButton.addEventListener('click', () => {
+                    
+                    const tempTextarea = document.createElement('textarea');
+                    tempTextarea.value = hashHex;
+                    document.body.appendChild(tempTextarea);
+                    tempTextarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempTextarea);
+
+                 
+                    alert('Hash copied to clipboard!');
+                });
+
+                const existingCopyButtons = document.querySelectorAll('.copy-button');
+                existingCopyButtons.forEach(button => button.remove());
+
+                
+                outputElement.appendChild(copyButton);
+            });
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <img id="logo" src="logo.png" alt="GuardianCrypt">
+    </header>
+
+   
+
+    <div id="container">
+        <h1>Hash Generator</h1>
+        <form>
+            <label for="input">Enter text:</label>
+            <input type="text" id="input">
+
+            <label for="algorithm">Choose algorithm:</label>
+            <select id="algorithm">
+                <option value="sha256">SHA-256</option>
+                <option value="sha512">SHA-512</option>
+                <option value="sha1">SHA-1</option>
+                <option value="sha384">SHA-384</option>
+            </select>
+
+            <button type="button" onclick="hashString(document.getElementById('input').value, document.getElementById('algorithm').value)">Generate Hash</button>
+        </form>
+
+        <div id="output-container">
+            <p id="output-label">Output:</p>
+            <p id="output"></p>
+        </div>
+    </div>
+</body>
+</html>
